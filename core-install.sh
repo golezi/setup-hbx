@@ -15,7 +15,9 @@ if [ ! -d "$CORE_ROOT" ]; then
 fi
 
 npm config set registry https://registry.npmmirror.com
-yarn config set registry https://registry.npmmirror.com
+if command -v yarn >/dev/null 2>&1; then
+    YARN_IGNORE_PATH=1 yarn config set registry https://registry.npmmirror.com
+fi
 export NVM_NODEJS_ORG_MIRROR=https://mirrors.ustc.edu.cn/node/
 npm install -g cross-env
 cd "$CORE_ROOT/plugins"
