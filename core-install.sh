@@ -15,15 +15,18 @@ if [ ! -d "$CORE_ROOT" ]; then
 fi
 
 npm config set registry https://registry.npmmirror.com
+YARN_REGISTRY=${YARN_REGISTRY:-https://registry.npmmirror.com}
 if command -v yarn >/dev/null 2>&1; then
-    YARN_IGNORE_PATH=1 yarn config set registry https://registry.npmmirror.com
+    export YARN_IGNORE_PATH=1
+    export YARN_NPM_REGISTRY_SERVER="$YARN_REGISTRY"
+    export YARN_REGISTRY="$YARN_REGISTRY"
 fi
 export NVM_NODEJS_ORG_MIRROR=https://mirrors.ustc.edu.cn/node/
 npm install -g cross-env
 cd "$CORE_ROOT/plugins"
 npm i
 cd "$CORE_ROOT/plugins/uniapp-cli-vite"
-yarn --force
+yarn --registry "$YARN_REGISTRY" --force
 cd "$CORE_ROOT/plugins/uniapp-cli"
 npm i -f
 chmod +x "$CORE_ROOT/plugins/compile-node-sass/node_modules/node-sass-china/vendor/linux-x64-108/binding.node"
