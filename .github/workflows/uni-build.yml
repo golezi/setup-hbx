@@ -1,0 +1,40 @@
+name: UniApp Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - '.github/workflows/uni-build.yml'
+      - 'scripts/**'
+      - 'core-install.sh'
+      - 'core-*.tar.gz'
+      - 'core-*.zip'
+      - 'action.yml'
+      - 'package.json'
+      - 'package-lock.json'
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Prepare sample UniApp project
+        run: |
+          rm -rf sample-uniapp
+          npx --yes degit dcloudio/uni-preset-vue#vite sample-uniapp
+          cd sample-uniapp
+          npm install
+
+      - name: Build using local action
+        uses: ./
+        with:
+          core_version: '4.86'
+          uni_project_dir: sample-uniapp
+          output_dir: sample-output
+
+      - name: List build output
+        run: ls -R sample-output

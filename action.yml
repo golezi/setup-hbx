@@ -1,0 +1,81 @@
+name: 'Setup HBX UniApp Builder'
+description: 'Install HBuilderX core and build a UniApp (Vite) project for app-plus.'
+author: 'Codex'
+inputs:
+  core_version:
+    description: 'HBuilderX core version or archive name (e.g. 4.86, core-4.15.0.tar.gz).'
+    required: false
+    default: '4.86'
+  uni_project_dir:
+    description: 'Path to the UniApp project inside the workflow workspace.'
+    required: false
+    default: '.'
+  output_dir:
+    description: 'Directory to store the Uni build output (relative or absolute).'
+    required: false
+    default: 'result'
+  node_env:
+    description: 'Value for UNI_NODE_ENV.'
+    required: false
+    default: 'production'
+outputs:
+  output-dir:
+    description: 'Absolute path to the build output directory.'
+    value: ${{ steps.resolve-paths.outputs.output }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - name: Install Yarn
+      shell: bash
+      run: npm install -g yarn
+    - name: Resolve project and output paths
+      id: resolve-paths
+      shell: bash
+      env:
+        UNI_PROJECT_DIR: ${{ inputs.uni_project_dir }}
+        UNI_OUTPUT_DIR: ${{ inputs.output_dir }}
+      run: |
+        set -euo pipefail
+        WORKSPACE="${GITHUB_WORKSPACE:-$PWD}"
+        PROJECT="$UNI_PROJECT_DIR"
+        if [[ ! "$PROJECT" = /* ]]; then
+          PROJECT="$WORKSPACE/$PROJECT"
+        fi
+        if [[ ! -d "$PROJECT" ]]; then
+          echo "Project directory '$PROJECT' does not exist." >&2
+          exit 1
+        fi
+        OUTPUT="$UNI_OUTPUT_DIR"
+        if [[ ! "$OUTPUT" = /* ]]; then
+          OUTPUT="$WORKSPACE/$OUTPUT"
+        fi
+        mkdir -p "$OUTPUT"
+        echo "project=$PROJECT" >> "$GITHUB_OUTPUT"
+        echo "output=$OUTPUT" >> "$GITHUB_OUTPUT"
+    - name: Extract HBuilderX core
+      id: extract-core
+      shell: bash
+      env:
+        CORE_VERSION: ${{ inputs.core_version }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/extract-core.sh" "$CORE_VERSION"
+    - name: Prepare HBuilderX core
+      shell: bash
+      env:
+        CORE_ROOT: ${{ steps.extract-core.outputs.core-root }}
+      run: bash "$GITHUB_ACTION_PATH/scripts/setup-core.sh"
+    - name: Build UniApp project
+      shell: bash
+      env:
+        CORE_ROOT: ${{ steps.extract-core.outputs.core-root }}
+        UNI_INPUT_DIR: ${{ steps.resolve-paths.outputs.project }}
+        UNI_OUTPUT_DIR: ${{ steps.resolve-paths.outputs.output }}
+        UNI_NODE_ENV: ${{ inputs.node_env }}
+      run: |
+        set -euo pipefail
+        export HBX_PLUGIN_DIR="$CORE_ROOT/plugins/uniapp-cli-vite"
+        export INIT_CWD="${GITHUB_WORKSPACE:-$PWD}"
+        node "$GITHUB_ACTION_PATH/scripts/run-app.js"
