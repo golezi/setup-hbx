@@ -24,9 +24,13 @@ fi
 export NVM_NODEJS_ORG_MIRROR=https://mirrors.ustc.edu.cn/node/
 npm install -g cross-env
 cd "$CORE_ROOT/plugins"
+rm -rf node_modules
 npm i
 cd "$CORE_ROOT/plugins/uniapp-cli-vite"
+# remove stale node_modules to avoid mismatched binaries from bundled archives
+rm -rf node_modules
 yarn --registry "$YARN_REGISTRY" --force
 cd "$CORE_ROOT/plugins/uniapp-cli"
+rm -rf node_modules
 npm i -f
 chmod +x "$CORE_ROOT/plugins/compile-node-sass/node_modules/node-sass-china/vendor/linux-x64-108/binding.node"
