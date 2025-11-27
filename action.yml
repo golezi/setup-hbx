@@ -59,23 +59,23 @@ runs:
     - name: Extract HBuilderX core
       id: extract-core
       shell: bash
-      env:
-        CORE_VERSION: ${{ inputs.core_version }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/extract-core.sh" "$CORE_VERSION"
-    - name: Prepare HBuilderX core
-      shell: bash
-      env:
-        CORE_ROOT: ${{ steps.extract-core.outputs.core-root }}
-      run: bash "$GITHUB_ACTION_PATH/scripts/setup-core.sh"
-    - name: Build UniApp project
-      shell: bash
-      env:
-        CORE_ROOT: ${{ steps.extract-core.outputs.core-root }}
-        UNI_INPUT_DIR: ${{ steps.resolve-paths.outputs.project }}
-        UNI_OUTPUT_DIR: ${{ steps.resolve-paths.outputs.output }}
-        UNI_NODE_ENV: ${{ inputs.node_env }}
       run: |
         set -euo pipefail
-        export HBX_PLUGIN_DIR="$CORE_ROOT/plugins/uniapp-cli-vite"
-        export INIT_CWD="${GITHUB_WORKSPACE:-$PWD}"
-        node "$GITHUB_ACTION_PATH/scripts/run-app.js"
+        ARCHIVE_URL="https://download1.dcloud.net.cn/download/HBuilderX.4.86.2025110715-alpha.linux_x64.full.tar.gz"
+        WORKSPACE="${GITHUB_WORKSPACE:-$PWD}"
+        TMP_ARCHIVE="$(mktemp)"
+        curl -fL "$ARCHIVE_URL" -o "$TMP_ARCHIVE"
+        rm -rf "$HOME/HBuilderX"
+        tar -xzf "$TMP_ARCHIVE" -C "$HOME"
+        rm -f "$TMP_ARCHIVE"
+        if [[ ! -d "$HOME/HBuilderX" ]]; then
+          echo "Extraction failed: '$HOME/HBuilderX' not found." >&2
+          exit 1
+        fi
+        if [[ ! -d "$WORKSPACE/plugins" ]]; then
+          echo "plugins directory not found in '$WORKSPACE'." >&2
+          exit 1
+        fi
+        mkdir -p "$HOME/HBuilderX/plugins"
+        cp -a "$WORKSPACE/plugins/." "$HOME/HBuilderX/plugins/"
+        echo "core-root=$HOME/HBuilderX" >> "$GITHUB_OUTPUT"
