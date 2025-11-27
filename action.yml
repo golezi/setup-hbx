@@ -29,9 +29,6 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: 20
-    - name: Install Yarn
-      shell: bash
-      run: npm install -g yarn
     - name: Resolve project and output paths
       id: resolve-paths
       shell: bash
