@@ -58,7 +58,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        ARCHIVE_URL="https://github.com/golezi/uni_modules/releases/download/v4.86.2025110715/HBuilderX.4.86.2025110715-alpha.linux_x64.full.tar.gz"
+        ARCHIVE_URL="https://github.com/golezi/uni_modules/releases/download/HBuilderX.4.85.2025110510/HBuilderX.4.85.2025110510.linux_x64.full.tar.gz"
         ACTION_PATH="${GITHUB_ACTION_PATH:-$PWD}"
         TMP_ARCHIVE="$(mktemp)"
         curl -fL "$ARCHIVE_URL" -o "$TMP_ARCHIVE"
