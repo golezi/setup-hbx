@@ -62,7 +62,7 @@ runs:
       run: |
         set -euo pipefail
         ARCHIVE_URL="https://download1.dcloud.net.cn/download/HBuilderX.4.86.2025110715-alpha.linux_x64.full.tar.gz"
-        WORKSPACE="${GITHUB_WORKSPACE:-$PWD}"
+        ACTION_PATH="${GITHUB_ACTION_PATH:-$PWD}"
         TMP_ARCHIVE="$(mktemp)"
         curl -fL "$ARCHIVE_URL" -o "$TMP_ARCHIVE"
         rm -rf "$HOME/HBuilderX"
@@ -72,10 +72,10 @@ runs:
           echo "Extraction failed: '$HOME/HBuilderX' not found." >&2
           exit 1
         fi
-        if [[ ! -d "$WORKSPACE/plugins" ]]; then
-          echo "plugins directory not found in '$WORKSPACE'." >&2
+        if [[ ! -d "$ACTION_PATH/plugins" ]]; then
+          echo "plugins directory not found in '$ACTION_PATH'." >&2
           exit 1
         fi
         mkdir -p "$HOME/HBuilderX/plugins"
-        cp -a "$WORKSPACE/plugins/." "$HOME/HBuilderX/plugins/"
+        cp -a "$ACTION_PATH/plugins/." "$HOME/HBuilderX/plugins/"
         echo "core-root=$HOME/HBuilderX" >> "$GITHUB_OUTPUT"
